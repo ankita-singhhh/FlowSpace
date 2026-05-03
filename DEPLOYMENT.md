@@ -28,7 +28,7 @@ VITE_API_URL=http://localhost:5000
 
 ## 🚀 Quick Start
 
-### Option 1: Vercel (Frontend) + Render (Backend) - Recommended
+### Option 1: Netlify (Frontend) + Render (Backend) - Recommended (due to Vercel issues)
 
 #### Backend Deployment (Render)
 1. Go to [Render Dashboard](https://render.com/)
@@ -41,13 +41,25 @@ VITE_API_URL=http://localhost:5000
    - `NODE_ENV` - `production`
 5. Deploy
 
-#### Frontend Deployment (Vercel)
-1. Go to [Vercel Dashboard](https://vercel.com/)
-2. Click "Add New Project" → "Import Git Repository"
-3. Enter: `https://github.com/ankita-singhhh/FlowSpace.git`
-4. Set environment variable: `VITE_API_URL=your-render-backend-url`
-5. **Important:** Set Build Command to: `npm install --legacy-peer-deps && npm run build`
+#### Frontend Deployment (Netlify)
+1. Go to [Netlify Dashboard](https://app.netlify.com/)
+2. Click "Add new site" → "Import an existing project"
+3. Connect your GitHub repository: `https://github.com/ankita-singhhh/FlowSpace.git`
+4. Set build settings:
+   - Build command: `npm install --legacy-peer-deps && npm run build`
+   - Publish directory: `flowspace-frontend/dist`
+5. Set environment variable: `VITE_API_URL=your-render-backend-url`
 6. Deploy
+
+#### Alternative: Manual Build + Static Hosting
+```bash
+# Build locally
+cd flowspace-frontend
+npm install --legacy-peer-deps
+npm run build
+
+# Deploy dist folder to any static host (Netlify, Vercel, GitHub Pages, etc.)
+```
 
 ### Option 2: Single Server Deployment
 
