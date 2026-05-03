@@ -1,7 +1,7 @@
 [build]
-  base = "/"
+  base = "flowspace-frontend/"
   command = "npm install --legacy-peer-deps && npm run build"
-  publish = "flowspace-frontend/dist"
+  publish = "dist"
 
 [build.environment]
   NODE_VERSION = "18"
