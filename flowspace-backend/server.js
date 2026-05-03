@@ -36,6 +36,9 @@ app.get('/api/health', (req, res) => {
   res.json({ success: true, message: 'FlowSpace API is running' });
 });
 
+app.get('/', (req, res) => {
+  res.send('FlowSpace Backend is Running 🚀');
+});
 // 404 handler
 app.use((req, res, next) => {
   res.status(404).json({ success: false, message: 'Route not found' });
