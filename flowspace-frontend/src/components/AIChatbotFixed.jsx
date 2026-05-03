@@ -18,7 +18,7 @@ export default function AIChatbot() {
   useEffect(() => {
     const checkAPIStatus = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/ai/chat', {
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/ai/chat`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -136,7 +136,7 @@ Choose a FREE AI provider to get started:
 
     try {
       // Call the AI API
-      const response = await fetch('http://localhost:5000/api/ai/chat', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/ai/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

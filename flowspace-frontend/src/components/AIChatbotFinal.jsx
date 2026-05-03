@@ -23,7 +23,7 @@ export default function AIChatbot() {
         const token = localStorage.getItem('fs_access_token');
         console.log('Token exists:', !!token);
         
-        const response = await fetch('http://localhost:5000/api/ai/chat', {
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/ai/chat`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
