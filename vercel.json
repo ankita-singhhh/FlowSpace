@@ -1,11 +1,13 @@
 {
   "version": 2,
+  "buildCommand": "npm install --legacy-peer-deps --force && npm run build",
+  "installCommand": "npm install --legacy-peer-deps --force",
   "builds": [
     {
       "src": "package.json",
       "use": "@vercel/static-build",
       "config": {
-        "installCommand": "npm install --legacy-peer-deps",
+        "installCommand": "rm -rf node_modules package-lock.json && npm install --legacy-peer-deps --force",
         "buildCommand": "npm run build"
       }
     }
