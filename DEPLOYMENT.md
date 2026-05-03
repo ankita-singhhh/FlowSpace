@@ -26,125 +26,81 @@ GEMINI_API_KEY=your-gemini-api-key
 VITE_API_URL=http://localhost:5000
 ```
 
-## Local Development
+## 🚀 Quick Start
 
-### Backend Setup
-```bash
-cd flowspace-backend
-npm install
-cp .env.example .env
-# Edit .env with your configuration
-npm run dev
-```
+### Option 1: Vercel (Frontend) + Render (Backend) - Recommended
 
-### Frontend Setup
-```bash
-cd flowspace-frontend
-npm install
-cp .env.example .env
-# Edit .env with your configuration
-npm run dev
-```
-
-## Production Deployment
-
-### Option 1: Vercel (Frontend) + Render/Railway (Backend)
-
-#### Backend Deployment (Render/Railway)
-1. Push code to GitHub
-2. Create new web service on Render/Railway
-3. Connect your GitHub repository
-4. Set environment variables
+#### Backend Deployment (Render)
+1. Go to [Render Dashboard](https://render.com/)
+2. Click "New" → "Web Service"
+3. Connect your GitHub repository: `https://github.com/ankita-singhhh/FlowSpace.git`
+4. Set environment variables:
+   - `MONGODB_URI` - Your MongoDB connection string
+   - `JWT_SECRET` - Secure random string
+   - `CLIENT_URL` - Your Render URL
+   - `NODE_ENV` - `production`
 5. Deploy
 
 #### Frontend Deployment (Vercel)
-1. Push code to GitHub
-2. Import project in Vercel
-3. Set environment variable: `VITE_API_URL=your-backend-url`
-4. Deploy
+1. Go to [Vercel Dashboard](https://vercel.com/)
+2. Click "Add New Project" → "Import Git Repository"
+3. Enter: `https://github.com/ankita-singhhh/FlowSpace.git`
+4. Set environment variable: `VITE_API_URL=your-render-backend-url`
+5. Deploy
 
 ### Option 2: Single Server Deployment
 
-#### Build Frontend
 ```bash
+# Build frontend
 cd flowspace-frontend
 npm run build
-```
 
-#### Serve with Backend
-```bash
+# Serve from backend
 cd flowspace-backend
-# Copy built frontend to backend/public folder
 cp -r ../flowspace-frontend/dist public
 npm install
 npm start
 ```
 
-### Option 3: Docker Deployment
+## 🔧 Environment Variables
 
-#### Dockerfile (Backend)
-```dockerfile
-FROM node:18-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY . .
-EXPOSE 5000
-CMD ["npm", "start"]
+### Backend (.env)
+```env
+PORT=5000
+MONGODB_URI=mongodb+srv://your-username:your-password@cluster.mongodb.net/flowspace
+JWT_SECRET=your-secure-jwt-secret
+CLIENT_URL=your-production-url
+NODE_ENV=production
 ```
 
-#### Dockerfile (Frontend)
-```dockerfile
-FROM node:18-alpine as build
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npm run build
-
-FROM nginx:alpine
-COPY --from=build /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+### Frontend (.env)
+```env
+VITE_API_URL=your-backend-url
 ```
 
-#### docker-compose.yml
-```yaml
-version: '3.8'
-services:
-  backend:
-    build: ./flowspace-backend
-    ports:
-      - "5000:5000"
-    environment:
-      - MONGODB_URI=mongodb://mongo:27017/flowspace
-      - JWT_SECRET=your-secret
-    depends_on:
-      - mongo
-  
-  frontend:
-    build: ./flowspace-frontend
-    ports:
-      - "80:80"
-    depends_on:
-      - backend
-  
-  mongo:
-    image: mongo:latest
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo-data:/data/db
+## 📋 Pre-Deployment Checklist
 
-volumes:
-  mongo-data:
-```
+- [ ] Backend environment variables set
+- [ ] Frontend environment variables set
+- [ ] MongoDB Atlas connection working
+- [ ] Frontend builds successfully
+- [ ] All API endpoints tested
+- [ ] PWA icons added (optional)
 
-#### Deploy with Docker
-```bash
-docker-compose up -d
-```
+## 🌐 Live URLs
+
+After deployment:
+- **Frontend**: Your Vercel URL
+- **Backend**: Your Render URL
+- **MongoDB**: Atlas Dashboard
+
+## 📞 Support
+
+For issues:
+- Check environment variables
+- Verify MongoDB connection
+- Review deployment logs
+- Check API endpoints development team
 
 ## PWA Setup
 
