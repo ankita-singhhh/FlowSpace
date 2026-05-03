@@ -155,8 +155,10 @@ export const AuthProvider = ({ children }) => {
       console.error('Logout API call failed:', error);
     } finally {
       // Clear local storage and state
-      localStorage.removeItem('fs_token');
-      setToken(null);
+      localStorage.removeItem('fs_access_token');
+      localStorage.removeItem('fs_refresh_token');
+      setAccessToken(null);
+      setRefreshToken(null);
       setUser(null);
     }
   };
