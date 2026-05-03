@@ -169,7 +169,8 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     user,
-    token,
+    accessToken,
+    refreshToken,
     isLoading,
     login,
     register,
