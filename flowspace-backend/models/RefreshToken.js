@@ -26,7 +26,7 @@ const refreshTokenSchema = new mongoose.Schema({
 });
 
 // Index for faster queries
-refreshTokenSchema.index({ token: 1 });
+// Note: token field already has unique: true which creates an index automatically
 refreshTokenSchema.index({ userId: 1 });
 refreshTokenSchema.index({ expiresAt: 1 });
 
