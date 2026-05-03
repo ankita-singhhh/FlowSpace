@@ -3,8 +3,9 @@ import api from '../utils/api';
 
 const AuthContext = createContext();
 
-export { AuthContext };
+export const useAuth = () => useContext(AuthContext);
 
+export { AuthContext };
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -12,20 +13,26 @@ export const AuthProvider = ({ children }) => {
   const [refreshToken, setRefreshToken] = useState(localStorage.getItem('fs_refresh_token'));
   const [isLoading, setIsLoading] = useState(true);
 
-  // Function to refresh access token
+  // 🔁 Refresh Access Token
   const refreshAccessToken = async () => {
     const storedRefreshToken = localStorage.getItem('fs_refresh_token');
+
     if (!storedRefreshToken) {
       logout();
       return false;
     }
 
     try {
-      const response = await api.post('/auth/refresh', { refreshToken: storedRefreshToken });
+      const response = await api.post('/auth/refresh', {
+        refreshToken: storedRefreshToken
+      });
+
       if (response.data.success) {
         const newAccessToken = response.data.data.accessToken;
+
         localStorage.setItem('fs_access_token', newAccessToken);
         setAccessToken(newAccessToken);
+
         return true;
       }
     } catch (error) {
@@ -33,137 +40,137 @@ export const AuthProvider = ({ children }) => {
       logout();
       return false;
     }
+
     return false;
   };
 
+  // 🔍 Check user on load
   useEffect(() => {
-    const storedAccessToken = localStorage.getItem('fs_access_token');
-    const storedRefreshToken = localStorage.getItem('fs_refresh_token');
-    
-    console.log('AuthContext: Tokens found:', !!storedAccessToken, !!storedRefreshToken);
-    
-    if (storedAccessToken && storedRefreshToken) {
-      // Get current user from API
-      const getCurrentUser = async () => {
-        try {
-          const response = await api.get('/auth/me');
-          console.log('AuthContext: Current user response:', response.data);
-          if (response.data.success) {
-            setUser(response.data.data);
-            console.log('AuthContext: User set:', response.data.data);
-          }
-        } catch (error) {
-          console.error('AuthContext: Failed to get current user:', error);
-          console.error('AuthContext: Error details:', error.response?.data || error.message);
-          
-          // Try to refresh token if access token is expired
-          if (error.response?.status === 401) {
-            const refreshed = await refreshAccessToken();
-            if (refreshed) {
-              // Retry getting current user with new token
-              try {
-                const retryResponse = await api.get('/auth/me');
-                if (retryResponse.data.success) {
-                  setUser(retryResponse.data.data);
-                }
-              } catch (retryError) {
-                logout();
+    const initAuth = async () => {
+      const storedAccessToken = localStorage.getItem('fs_access_token');
+      const storedRefreshToken = localStorage.getItem('fs_refresh_token');
+
+      if (!storedAccessToken || !storedRefreshToken) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const response = await api.get('/auth/me');
+
+        if (response.data.success) {
+          setUser(response.data.data);
+        }
+      } catch (error) {
+        if (error.response?.status === 401) {
+          const refreshed = await refreshAccessToken();
+
+          if (refreshed) {
+            try {
+              const retry = await api.get('/auth/me');
+              if (retry.data.success) {
+                setUser(retry.data.data);
               }
-            } else {
+            } catch {
               logout();
             }
           } else {
             logout();
           }
-        } finally {
-          setIsLoading(false);
+        } else {
+          logout();
         }
-      };
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-      getCurrentUser();
-    } else {
-      console.log('AuthContext: No tokens found');
-      setIsLoading(false);
-    }
+    initAuth();
   }, []);
 
+  // 🔐 Login
   const login = async (email, password) => {
     try {
       const response = await api.post('/auth/login', { email, password });
-      
+
       if (response.data.success) {
         const { accessToken, refreshToken, ...userData } = response.data.data;
-        
-        // Save tokens to localStorage
+
         localStorage.setItem('fs_access_token', accessToken);
         localStorage.setItem('fs_refresh_token', refreshToken);
-        
-        // Update state
+
         setAccessToken(accessToken);
         setRefreshToken(refreshToken);
         setUser(userData);
-        
+
         return { success: true };
-      } else {
-        return { success: false, error: response.data.message || 'Login failed' };
       }
+
+      return { success: false, error: response.data.message };
     } catch (error) {
-      const errorMessage = error.response?.data?.message || 'Login failed';
-      return { success: false, error: errorMessage };
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Login failed'
+      };
     }
   };
 
+  // 📝 Register
   const register = async (name, email, password) => {
     try {
       const response = await api.post('/auth/register', { name, email, password });
-      
+
       if (response.data.success) {
         const { accessToken, refreshToken, ...userData } = response.data.data;
-        
-        // Save tokens to localStorage
+
         localStorage.setItem('fs_access_token', accessToken);
         localStorage.setItem('fs_refresh_token', refreshToken);
-        
-        // Update state
+
         setAccessToken(accessToken);
         setRefreshToken(refreshToken);
         setUser(userData);
-        
+
         return { success: true };
-      } else {
-        return { success: false, error: response.data.message || 'Registration failed' };
       }
+
+      return { success: false, error: response.data.message };
     } catch (error) {
-      const errorMessage = error.response?.data?.message || 'Registration failed';
-      return { success: false, error: errorMessage };
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Registration failed'
+      };
     }
   };
 
+  // 🚪 Logout
   const logout = async () => {
     try {
-      // Call logout API endpoint
       await api.post('/auth/logout');
     } catch (error) {
       console.error('Logout API call failed:', error);
     } finally {
-      // Clear local storage and state
       localStorage.removeItem('fs_access_token');
       localStorage.removeItem('fs_refresh_token');
+
       setAccessToken(null);
       setRefreshToken(null);
       setUser(null);
     }
   };
 
+  // 🔄 Update user
   const updateUser = (userData) => {
     setUser(prev => ({ ...prev, ...userData }));
   };
+
+  // ✅ IMPORTANT: token ALWAYS defined
+  const token = accessToken || null;
 
   const value = {
     user,
     accessToken,
     refreshToken,
-    token: accessToken || null, 
+    token, // ✅ safe now
     isLoading,
     login,
     register,
