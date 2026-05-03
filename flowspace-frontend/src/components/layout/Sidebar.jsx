@@ -23,6 +23,7 @@ import { useAuth } from '../../hooks/useAuth';
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, current: true },
   { name: 'Tasks', href: '/tasks', icon: CheckSquare, current: false },
+  { name: 'Goals', href: '/goals', icon: Target, current: false },
   { name: 'Reminders', href: '/reminders', icon: Bell, current: false },
   { name: 'Planner', href: '/planner', icon: Calendar, current: false },
   { name: 'Habits', href: '/habits', icon: Target, current: false },

@@ -3,6 +3,7 @@ const urlsToCache = [
   '/',
   '/dashboard',
   '/tasks',
+  '/goals',
   '/reminders',
   '/habits',
   '/notes',
@@ -25,15 +26,34 @@ self.addEventListener('fetch', (event) => {
         if (response) {
           return response;
         }
-        return fetch(event.request).then((response) => {
-          if (!response || response.status !== 200 || response.type !== 'basic') {
-            return response;
-          }
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME)
-            .then((cache) => {
-              cache.put(event.request, responseToCache);
+        
+        // Handle API requests differently - don't cache them
+        if (event.request.url.includes('/api/')) {
+          return fetch(event.request).catch(() => {
+            // Return a fallback response for API failures
+            return new Response(JSON.stringify({ error: 'Network error' }), {
+              status: 500,
+              headers: { 'Content-Type': 'application/json' }
             });
+          });
+        }
+        
+        return fetch(event.request).catch((error) => {
+          console.log('Fetch failed for:', event.request.url, error);
+          // Return a basic HTML page for navigation failures
+          if (event.request.destination === 'document') {
+            return caches.match('/');
+          }
+          return new Response('Offline', { status: 503 });
+        }).then((response) => {
+          // Only cache successful responses
+          if (response && response.status === 200 && response.type === 'basic') {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME)
+              .then((cache) => {
+                cache.put(event.request, responseToCache);
+              });
+          }
           return response;
         });
       })

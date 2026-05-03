@@ -4,6 +4,7 @@ import AuthPage from './pages/AuthPage';
 import AppLayout from './components/layout/AppLayout';
 import DashboardPage from './pages/DashboardPage';
 import TasksPage from './pages/TasksPage';
+import GoalsPage from './pages/GoalsPage';
 import RemindersPage from './pages/RemindersPage';
 import PlannerPage from './pages/PlannerPage';
 import HabitsPage from './pages/HabitsPage';
@@ -77,6 +78,7 @@ function AppContent() {
           <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/tasks" element={<TasksPage />} />
+            <Route path="/goals" element={<GoalsPage />} />
             <Route path="/reminders" element={<RemindersPage />} />
             <Route path="/planner" element={<PlannerPage />} />
             <Route path="/habits" element={<HabitsPage />} />

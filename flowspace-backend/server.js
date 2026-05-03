@@ -15,11 +15,12 @@ const app = express();
 // Middleware
 app.use(helmet());
 app.use(cors({ 
-  origin: process.env.CLIENT_URL || [
+  origin: [
     'http://localhost:5173',
     'http://localhost:3000',
-    'https://flowspaace.netlify.app'
-  ], 
+    'https://flowspaace.netlify.app',
+    process.env.CLIENT_URL
+  ].filter(Boolean), 
   credentials: true 
 }));
 app.use(express.json());
@@ -38,6 +39,7 @@ app.use('/api/notes', require('./routes/notes'));
 app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/ai', require('./routes/ai'));
+app.use('/api/goals', require('./routes/goals'));
 
 app.get('/api/health', (req, res) => {
   res.json({ success: true, message: 'FlowSpace API is running' });

@@ -55,6 +55,23 @@ const taskSchema = new mongoose.Schema({
   },
   actualMinutes: {
     type: Number,
+  },
+  dayNumber: {
+    type: Number,
+  },
+  taskType: {
+    type: String,
+    enum: ['study', 'practice', 'build', 'review'],
+  },
+  timerSessions: [{
+    startTime: { type: Date },
+    endTime: { type: Date },
+    duration: { type: Number },
+    paused: { type: Boolean, default: false }
+  }],
+  goalId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Goal'
   }
 }, {
   timestamps: true
@@ -64,6 +81,7 @@ const taskSchema = new mongoose.Schema({
 taskSchema.index({ userId: 1, status: 1 });
 taskSchema.index({ userId: 1, dueDate: 1 });
 taskSchema.index({ userId: 1, category: 1 });
+taskSchema.index({ goalId: 1, dayNumber: 1 });
 
 const Task = mongoose.model('Task', taskSchema);
 module.exports = Task;

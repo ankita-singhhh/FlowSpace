@@ -353,6 +353,13 @@ export default function TasksPage() {
                       )}
                     </div>
                     <div className="flex items-center gap-1">
+                      {task.goalId && task.dayNumber && (
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                          isDark ? 'bg-blue-900/50 text-blue-400' : 'bg-blue-100 text-blue-700'
+                        }`}>
+                          Day {task.dayNumber}
+                        </span>
+                      )}
                       <span className={`px-2 py-1 text-xs font-medium rounded ${
                         task.priority === 'High'
                           ? 'bg-red-100 text-red-700'
