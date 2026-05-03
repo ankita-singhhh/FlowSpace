@@ -22,7 +22,7 @@ export default function AIChatbot() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('fs_token')}`
+            'Authorization': `Bearer ${localStorage.getItem('fs_access_token')}`
           },
           body: JSON.stringify({
             messages: [
@@ -140,7 +140,7 @@ Choose a FREE AI provider to get started:
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('fs_token')}`
+          'Authorization': `Bearer ${localStorage.getItem('fs_access_token')}`
         },
         body: JSON.stringify({
           messages: [

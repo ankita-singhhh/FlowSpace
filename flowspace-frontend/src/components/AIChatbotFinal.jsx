@@ -20,7 +20,7 @@ export default function AIChatbot() {
     const checkAPIStatus = async () => {
       console.log('Checking API status...');
       try {
-        const token = localStorage.getItem('fs_token');
+        const token = localStorage.getItem('fs_access_token');
         console.log('Token exists:', !!token);
         
         const response = await fetch('http://localhost:5000/api/ai/chat', {
@@ -113,7 +113,7 @@ Current status: Backend may be down or not responding.`,
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('fs_token')}`
+          'Authorization': `Bearer ${localStorage.getItem('fs_access_token')}`
         },
         body: JSON.stringify({
           messages: [
