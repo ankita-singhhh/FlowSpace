@@ -163,7 +163,7 @@ export const AuthProvider = ({ children }) => {
     user,
     accessToken,
     refreshToken,
-    token: accessToken, 
+    token: accessToken || null, 
     isLoading,
     login,
     register,
