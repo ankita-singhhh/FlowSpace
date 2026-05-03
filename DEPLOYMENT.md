@@ -46,7 +46,8 @@ VITE_API_URL=http://localhost:5000
 2. Click "Add New Project" → "Import Git Repository"
 3. Enter: `https://github.com/ankita-singhhh/FlowSpace.git`
 4. Set environment variable: `VITE_API_URL=your-render-backend-url`
-5. Deploy
+5. **Important:** Set Build Command to: `npm install --legacy-peer-deps && npm run build`
+6. Deploy
 
 ### Option 2: Single Server Deployment
 
