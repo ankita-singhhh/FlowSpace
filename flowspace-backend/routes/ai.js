@@ -25,7 +25,7 @@ router.post('/chat', async (req, res) => {
     console.log('Gemini API key length:', geminiApiKey?.length);
     console.log('API key starts with:', geminiApiKey?.substring(0, 10));
     
-    if (geminiApiKey) {
+    if (geminiApiKey && geminiApiKey.length > 10) {
       try {
         console.log('Making Gemini API request...');
         // First try to list models to see if API key works
@@ -137,14 +137,11 @@ router.post('/chat', async (req, res) => {
       }
     }
 
-    // No API keys configured
-    return res.status(500).json({
-      success: false,
-      message: 'No AI API key configured. Please add GEMINI_API_KEY or ANTHROPIC_API_KEY to your .env file.',
-      setup: {
-        gemini: 'Get free API key from: https://makersuite.google.com/app/apikey',
-        anthropic: 'Get API key from: https://console.anthropic.com'
-      }
+    // No API keys configured - return a helpful response
+    return res.json({
+      success: true,
+      content: "Hi! I'm FlowSpace AI assistant. Currently, the AI service is being configured. In the meantime, you can:\n\n• Create and manage tasks\n• Set up reminders and habits\n• Use the planner to organize your day\n• Track your productivity analytics\n\nThe AI chat feature will be available soon. Please check back later!",
+      provider: 'fallback'
     });
 
   } catch (error) {
