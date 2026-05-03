@@ -8,8 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest",
-    "test:ui": "vitest --ui"
+    "build:prod": "npm install --legacy-peer-deps && vite build"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.2.4",
