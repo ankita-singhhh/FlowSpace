@@ -19,6 +19,8 @@ export default defineConfig({
         manualChunks: undefined,
       },
     },
+    target: 'esnext',
+    minify: 'esbuild',
   },
   base: '/',
   css: {
@@ -28,5 +30,8 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.js'],
+  },
+  optimizeDeps: {
+    force: true,
   },
 })
