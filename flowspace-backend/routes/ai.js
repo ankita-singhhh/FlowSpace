@@ -19,6 +19,8 @@ router.post('/chat', async (req, res) => {
     const geminiApiKey = process.env.GEMINI_API_KEY;
 
     console.log('🤖 AI Chat: Gemini API Key exists:', !!geminiApiKey);
+    console.log('🤖 AI Chat: API Key length:', geminiApiKey ? geminiApiKey.length : 0);
+    console.log('🤖 AI Chat: API Key starts with:', geminiApiKey ? geminiApiKey.substring(0, 10) + '...' : 'N/A');
     
     if (geminiApiKey) {
       try {
@@ -123,6 +125,59 @@ router.post('/chat', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to process AI request'
+    });
+  }
+});
+
+// @route   GET /api/ai/test
+// @desc    Test Gemini API key
+router.get('/test', async (req, res) => {
+  try {
+    const geminiApiKey = process.env.GEMINI_API_KEY;
+    
+    if (!geminiApiKey) {
+      return res.json({
+        success: false,
+        message: 'No Gemini API key found in environment',
+        keyExists: false
+      });
+    }
+
+    // Simple test call to Gemini API
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${geminiApiKey}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: "Hello"
+          }]
+        }],
+        generationConfig: {
+          maxOutputTokens: 10,
+          temperature: 0.7,
+        }
+      })
+    });
+
+    const data = await response.json();
+    
+    return res.json({
+      success: response.ok,
+      status: response.status,
+      message: response.ok ? 'API key is valid' : 'API key test failed',
+      keyExists: true,
+      response: data
+    });
+    
+  } catch (error) {
+    console.error('API test error:', error);
+    return res.json({
+      success: false,
+      message: 'API test error: ' + error.message,
+      keyExists: !!process.env.GEMINI_API_KEY
     });
   }
 });
