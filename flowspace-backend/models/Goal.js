@@ -72,7 +72,9 @@ goalSchema.pre('save', function(next) {
   if (this.isModified('completedTasks') || this.isModified('totalTasks')) {
     this.completionPct = this.totalTasks > 0 ? Math.round((this.completedTasks / this.totalTasks) * 100) : 0;
   }
-  next();
+  if (typeof next === 'function') {
+    next();
+  }
 });
 
 // Index for faster queries

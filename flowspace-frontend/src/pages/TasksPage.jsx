@@ -19,12 +19,14 @@ import {
   Bell,
   Moon,
   Sun,
-  X
+  X,
+  Play
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../context/ThemeContext';
 import api from '../utils/api';
 import { toast } from 'react-hot-toast';
+import FocusTimer from '../components/FocusTimer';
 
 const categories = [
   { id: 'work', name: 'Work', icon: '💼' },
@@ -47,6 +49,8 @@ export default function TasksPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [showAddTask, setShowAddTask] = useState(false);
+  const [timerTask, setTimerTask] = useState(null);
+  const [menuTaskId, setMenuTaskId] = useState(null);
   const [newTask, setNewTask] = useState({
     title: '',
     description: '',
@@ -55,6 +59,18 @@ export default function TasksPage() {
     dueDate: '',
     dueTime: ''
   });
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuTaskId && !event.target.closest('.task-menu-container')) {
+        setMenuTaskId(null);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [menuTaskId]);
 
   // Fetch user tasks from backend
   useEffect(() => {
@@ -75,6 +91,28 @@ export default function TasksPage() {
 
     fetchTasks();
   }, [user]);
+
+  // Handle timer completion
+  const handleTimerComplete = () => {
+    setTimerTask(null);
+    // Refresh tasks to show updated status
+    const fetchTasks = async () => {
+      if (!user) return;
+      
+      try {
+        setLoading(true);
+        const response = await api.get('/tasks');
+        setTasks(response.data.data || []);
+      } catch (error) {
+        console.error('Error fetching tasks:', error);
+        setTasks([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTasks();
+  };
 
   // Handle adding a new task
   const handleAddTask = async (e) => {
@@ -143,18 +181,35 @@ export default function TasksPage() {
 
   // Handle task menu
   const handleTaskMenu = (taskId) => {
+    setMenuTaskId(menuTaskId === taskId ? null : taskId);
+  };
+
+  // Handle task actions
+  const handleEditTask = (taskId) => {
     const task = tasks.find(t => t._id === taskId);
     if (task) {
-      const details = [
-        `📝 ${task.title}`,
-        task.description && `📄 ${task.description}`,
-        `🏷️ ${task.category}`,
-        `⚡ ${task.priority}`,
-        `📅 ${task.dueDate || 'No due date'}`,
-        task.dueTime && `⏰ ${task.dueTime}`
-      ].filter(Boolean).join(' | ');
-      
-      toast.info(details);
+      setNewTask({
+        title: task.title,
+        description: task.description || '',
+        category: task.category?.toLowerCase() || 'personal',
+        priority: task.priority?.toLowerCase() || 'medium',
+        dueDate: task.dueDate || '',
+        dueTime: task.dueTime || ''
+      });
+      setShowAddTask(true);
+      setMenuTaskId(null);
+    }
+  };
+
+  const handleDeleteTask = async (taskId) => {
+    try {
+      await api.delete(`/tasks/${taskId}`);
+      setTasks(tasks.filter(t => t._id !== taskId));
+      toast.success('Task deleted successfully');
+      setMenuTaskId(null);
+    } catch (error) {
+      console.error('Error deleting task:', error);
+      toast.error('Failed to delete task');
     }
   };
 
@@ -370,11 +425,46 @@ export default function TasksPage() {
                         {task.priority}
                       </span>
                       <button 
-                        onClick={() => task._id && handleTaskMenu(task._id)}
-                        className={`p-1 rounded ${isDark ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
+                        onClick={() => task._id && setTimerTask({id: task._id, title: task.title})}
+                        className={`px-3 py-1 rounded text-xs font-medium ${isDark ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} bg-cyan-600 text-white`}
+                        title="Start Focus Timer"
                       >
-                        <MoreHorizontal size={16} />
+                        ⏱️ Timer
                       </button>
+                      <div className="relative task-menu-container">
+                        <button 
+                          onClick={() => task._id && handleTaskMenu(task._id)}
+                          className={`p-1 rounded ${isDark ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
+                        >
+                          <MoreHorizontal size={16} />
+                        </button>
+                        
+                        {/* Dropdown Menu */}
+                        {menuTaskId === task._id && (
+                          <div className={`absolute right-0 top-8 w-48 rounded-lg shadow-lg border z-10 ${
+                            isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+                          }`}>
+                            <button
+                              onClick={() => handleEditTask(task._id)}
+                              className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 ${
+                                isDark ? 'text-gray-300' : 'text-gray-700'
+                              }`}
+                            >
+                              <Edit size={14} />
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteTask(task._id)}
+                              className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 ${
+                                isDark ? 'text-gray-300' : 'text-gray-700'
+                              }`}
+                            >
+                              <Trash2 size={14} />
+                              Delete
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-4 text-sm">
@@ -556,6 +646,16 @@ export default function TasksPage() {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Focus Timer Modal */}
+      {timerTask && (
+        <FocusTimer
+          taskId={timerTask.id}
+          taskTitle={timerTask.title}
+          onComplete={handleTimerComplete}
+          onClose={() => setTimerTask(null)}
+        />
       )}
     </div>
   );

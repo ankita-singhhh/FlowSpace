@@ -40,6 +40,7 @@ app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/ai', require('./routes/ai'));
 app.use('/api/goals', require('./routes/goals'));
+app.use('/api/behavior', require('./routes/behavior'));
 
 app.get('/api/health', (req, res) => {
   res.json({ success: true, message: 'FlowSpace API is running' });

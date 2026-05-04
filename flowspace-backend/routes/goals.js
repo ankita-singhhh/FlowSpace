@@ -154,7 +154,24 @@ router.post('/generate-plan', async (req, res, next) => {
 
       const callGemini = async () => {
         try {
-          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
+          // First get available models to find the correct one
+          const modelsResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${geminiApiKey}`);
+          
+          if (!modelsResponse.ok) {
+            throw new Error(`Gemini API error: ${modelsResponse.status}`);
+          }
+
+          const modelsData = await modelsResponse.json();
+          const supportedModel = modelsData.models?.find(m => 
+            m.name.includes('gemini') && 
+            m.supportedGenerationMethods?.includes('generateContent')
+          );
+          
+          if (!supportedModel) {
+            throw new Error('No Gemini model found that supports generateContent');
+          }
+
+          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/${supportedModel.name}:generateContent?key=${geminiApiKey}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'

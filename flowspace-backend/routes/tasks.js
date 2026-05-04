@@ -162,4 +162,128 @@ router.patch('/:id/subtasks/:sid', async (req, res, next) => {
   }
 });
 
+// @route   POST /api/tasks/:id/session
+router.post('/:id/session', async (req, res, next) => {
+  try {
+    const { durationMinutes, sessionType } = req.body;
+    const taskId = req.params.id;
+
+    if (!durationMinutes || !sessionType) {
+      return res.status(400).json({
+        success: false,
+        message: 'durationMinutes and sessionType are required'
+      });
+    }
+
+    // Find and update task
+    const task = await Task.findOne({ _id: taskId, userId: req.user._id });
+    
+    if (!task) {
+      return res.status(404).json({ success: false, message: 'Task not found' });
+    }
+
+    // Increment timerSessions
+    task.timerSessions = (task.timerSessions || 0) + 1;
+    
+    let autoCompleted = false;
+    
+    // Auto-mark task as completed after 2 sessions
+    if (task.timerSessions >= 2) {
+      task.status = 'completed';
+      task.completedAt = new Date();
+      autoCompleted = true;
+      
+      // Update goal completion percentage if this task is linked to a goal
+      if (task.goalId) {
+        const Goal = require('../models/Goal');
+        await Goal.findByIdAndUpdate(task.goalId, {
+          $inc: { completedTasks: 1 }
+        });
+      }
+    }
+
+    await task.save();
+
+    // Save BehaviorLog
+    const BehaviorLog = require('../models/BehaviorLog');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Calculate tasks completed today
+    const tasksCompletedToday = await Task.countDocuments({
+      userId: req.user._id,
+      status: 'completed',
+      completedAt: { $gte: today }
+    });
+
+    // Calculate missed days in last 7 days
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    sevenDaysAgo.setHours(0, 0, 0, 0);
+    
+    const daysWithActivity = await BehaviorLog.distinct('date', {
+      userId: req.user._id,
+      date: { $gte: sevenDaysAgo }
+    });
+    
+    const missedDaysLast7 = Math.max(0, 7 - daysWithActivity.length);
+
+    // Get user streak (this would need to be calculated from user model or behavior logs)
+    // For now, we'll use a simple calculation
+    const streak = await calculateUserStreak(req.user._id);
+
+    const behaviorLog = await BehaviorLog.create({
+      userId: req.user._id,
+      date: new Date(),
+      hourSlot: new Date().getHours(),
+      tasksCompleted: tasksCompletedToday,
+      avgSessionDuration: durationMinutes,
+      dayOfWeek: new Date().getDay(),
+      streak: streak,
+      missedDaysLast7: missedDaysLast7
+    });
+
+    res.json({
+      success: true,
+      data: {
+        task,
+        autoCompleted,
+        sessionCount: task.timerSessions,
+        behaviorLog
+      }
+    });
+
+  } catch (error) {
+    console.error('Session endpoint error:', error);
+    next(error);
+  }
+});
+
+// Helper function to calculate user streak
+async function calculateUserStreak(userId) {
+  const BehaviorLog = require('../models/BehaviorLog');
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  let streak = 0;
+  let currentDate = new Date(today);
+  
+  for (let i = 0; i < 365; i++) { // Check up to a year
+    const log = await BehaviorLog.findOne({
+      userId: userId,
+      date: currentDate
+    });
+    
+    if (log && log.tasksCompleted > 0) {
+      streak++;
+    } else if (i > 0) { // Don't break on first day (today)
+      break;
+    }
+    
+    currentDate.setDate(currentDate.getDate() - 1);
+  }
+  
+  return streak;
+}
+
 module.exports = router;
