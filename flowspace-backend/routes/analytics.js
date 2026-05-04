@@ -400,14 +400,14 @@ router.get('/stats', async (req, res, next) => {
       console.log('🔧 Using fallback stats data (no database)');
       
       const fallbackStats = {
-        tasksDueToday: Math.floor(Math.random() * 8) + 1,
-        tasksCompleted: Math.floor(Math.random() * 20) + 10,
-        activeGoals: Math.floor(Math.random() * 5) + 2,
-        currentStreak: Math.floor(Math.random() * 15) + 5,
-        weeklyProgress: Math.floor(Math.random() * 30) + 60,
-        habitsCompleted: Math.floor(Math.random() * 8) + 3,
-        productivityScore: Math.floor(Math.random() * 20) + 75,
-        focusTime: Math.floor(Math.random() * 120) + 30
+        tasksDueToday: 5,
+        tasksCompleted: 12,
+        activeGoals: 3,
+        currentStreak: 7,
+        weeklyProgress: 68,
+        habitsCompleted: 4,
+        productivityScore: 85,
+        focusTime: 45
       };
 
       return res.json({ success: true, data: fallbackStats });
@@ -444,11 +444,11 @@ router.get('/stats', async (req, res, next) => {
       tasksDueToday,
       tasksCompleted,
       activeGoals,
-      currentStreak: Math.floor(Math.random() * 15) + 5,
-      weeklyProgress: Math.floor(Math.random() * 30) + 60,
+      currentStreak: 7,
+      weeklyProgress: 68,
       habitsCompleted,
-      productivityScore: Math.floor(Math.random() * 20) + 75,
-      focusTime: Math.floor(Math.random() * 120) + 30
+      productivityScore: 85,
+      focusTime: 45
     };
 
     res.json({ success: true, data: stats });
