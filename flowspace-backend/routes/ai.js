@@ -1,5 +1,4 @@
 const express = require('express');
-const axios = require('axios');
 const { protect } = require('../middleware/authMiddleware');
 
 const router = express.Router();
