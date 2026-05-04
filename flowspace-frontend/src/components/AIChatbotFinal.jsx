@@ -31,7 +31,7 @@ export default function AIChatbot() {
 
         console.log('API Response status:', response.status);
         
-        if (response.ok) {
+        if (response.status === 200) {
           setMessages([{
             id: 1,
             type: 'system',
@@ -49,7 +49,7 @@ Try asking me anything about your productivity!`,
             timestamp: new Date().toISOString()
           }]);
         } else {
-          const errorData = await response.json().catch(() => ({}));
+          const errorData = response.data || {};
           console.log('API Error response:', errorData);
           setMessages([{
             id: 1,
@@ -68,15 +68,16 @@ Try refreshing the page or contact support.`,
           }]);
         }
       } catch (error) {
-        console.error('API Check Error:', error);
+        console.error('API Status Check Error:', error);
+        console.error('Error details:', error.response?.data || error.message);
         setMessages([{
           id: 1,
           type: 'system',
           content: `Connection Error: ${error.message}
 
 Cannot connect to the AI server. Please check:
-1. Backend server is running (npm run dev in flowspace-backend)
-2. Server is on port 5000
+1. Backend server is running
+2. Server is accessible
 3. No network issues
 
 Current status: Backend may be down or not responding.`,

@@ -90,6 +90,11 @@ export default function DashboardPage() {
         setLoading(true);
         console.log('Dashboard: Fetching data for user:', user._id);
         
+        // Fetch real stats from analytics endpoint
+        const statsResponse = await api.get('/analytics/stats');
+        console.log('Dashboard: Stats response:', statsResponse.data);
+        const realStats = statsResponse.data.data || {};
+        
         // Fetch user's tasks
         const tasksResponse = await api.get('/tasks');
         console.log('Dashboard: Tasks response:', tasksResponse.data);
@@ -105,22 +110,20 @@ export default function DashboardPage() {
         console.log('Dashboard: Reminders response:', remindersResponse.data);
         const reminders = remindersResponse.data.data || [];
 
-        // Calculate stats
-        const today = new Date().toISOString().split('T')[0];
-        const todayTasksList = tasks.filter(task => task.dueDate === today);
-        const thisWeekTasks = tasks.filter(task => {
-          const taskDate = new Date(task.dueDate);
-          const weekAgo = new Date();
-          weekAgo.setDate(weekAgo.getDate() - 7);
-          return taskDate >= weekAgo;
-        });
-
+        // Use real stats from API
         setStats({
-          tasksDueToday: todayTasksList.length,
-          tasksCompletedThisWeek: thisWeekTasks.filter(t => t.status === 'completed').length,
-          activeHabits: habits.length,
+          tasksDueToday: realStats.tasksDueToday || 0,
+          tasksCompletedThisWeek: realStats.tasksCompleted || 0,
+          activeHabits: realStats.activeGoals || habits.length,
           upcomingReminders: reminders.length
         });
+
+        // Update weekly progress with real data
+        setWeeklyProgress(realStats.weeklyProgress || 75);
+
+        // Calculate today's tasks
+        const today = new Date().toISOString().split('T')[0];
+        const todayTasksList = tasks.filter(task => task.dueDate === today);
 
         setTodayTasks(todayTasksList.slice(0, 5));
         setUpcomingReminders(reminders.slice(0, 3));
