@@ -214,7 +214,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="flex items-center gap-1">
                   <TrendingUp size={16} className="text-green-500" />
-                  <span className="text-sm text-green-500">+12%</span>
+                  <span className="text-sm text-green-500">Today</span>
                 </div>
               </div>
               <h3 className="text-xl md:text-2xl font-bold">{stats.tasksDueToday}</h3>
@@ -228,7 +228,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="flex items-center gap-1">
                   <TrendingUp size={16} className="text-green-500" />
-                  <span className="text-sm text-green-500">+8%</span>
+                  <span className="text-sm text-green-500">This Week</span>
                 </div>
               </div>
               <h3 className="text-xl md:text-2xl font-bold">{stats.tasksCompletedThisWeek}</h3>
@@ -242,7 +242,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="flex items-center gap-1">
                   <TrendingUp size={16} className="text-green-500" />
-                  <span className="text-sm text-green-500">+2</span>
+                  <span className="text-sm text-green-500">Active</span>
                 </div>
               </div>
               <h3 className="text-xl md:text-2xl font-bold">{stats.activeHabits}</h3>
@@ -255,8 +255,8 @@ export default function DashboardPage() {
                   <Bell size={20} className="text-purple-600" />
                 </div>
                 <div className="flex items-center gap-1">
-                  <TrendingUp size={16} className="text-red-500" />
-                  <span className="text-sm text-red-500">-1</span>
+                  <TrendingUp size={16} className="text-blue-500" />
+                  <span className="text-sm text-blue-500">Pending</span>
                 </div>
               </div>
               <h3 className="text-xl md:text-2xl font-bold">{stats.upcomingReminders}</h3>
