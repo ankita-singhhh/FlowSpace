@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Brain, X, Send } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../hooks/useAuth';
+import api from '../utils/api';
 
 export default function AIChatbot() {
   const { user } = useAuth();
@@ -23,16 +24,9 @@ export default function AIChatbot() {
         const token = localStorage.getItem('fs_access_token');
         console.log('Token exists:', !!token);
         
-        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/ai/chat`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            messages: [{ role: 'user', content: 'Hello' }],
-            max_tokens: 1000
-          })
+        const response = await api.post('/ai/chat', {
+          messages: [{ role: 'user', content: 'Hello' }],
+          max_tokens: 1000
         });
 
         console.log('API Response status:', response.status);
@@ -109,22 +103,15 @@ Current status: Backend may be down or not responding.`,
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/ai/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('fs_access_token')}`
-        },
-        body: JSON.stringify({
-          messages: [
-            { role: 'system', content: 'You are FlowSpace AI, a helpful productivity assistant. Be concise and actionable.' },
-            { role: 'user', content: inputValue.trim() }
-          ],
-          max_tokens: 1000
-        })
+      const response = await api.post('/ai/chat', {
+        messages: [
+          { role: 'system', content: 'You are FlowSpace AI, a helpful productivity assistant. Be concise and actionable.' },
+          { role: 'user', content: inputValue.trim() }
+        ],
+        max_tokens: 1000
       });
 
-      const data = await response.json();
+      const data = response.data;
 
       if (data.success) {
         const aiMessage = {
