@@ -1,11 +1,10 @@
 [build]
   base = "flowspace-frontend/"
-  command = "npm ci --legacy-peer-deps && npm run build"
+  command = "npm install --force && npm run build"
   publish = "dist"
 
 [build.environment]
   NODE_VERSION = "20"
-  NPM_FLAGS = "--legacy-peer-deps"
   NPM_CONFIG_PRODUCTION = "false"
 
 [[headers]]
