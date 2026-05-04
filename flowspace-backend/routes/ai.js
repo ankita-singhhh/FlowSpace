@@ -18,49 +18,53 @@ router.post('/chat', async (req, res) => {
 
     const geminiApiKey = process.env.GEMINI_API_KEY;
 
-    // 🔥 Use Gemini if API key exists
+    console.log('🤖 AI Chat: Gemini API Key exists:', !!geminiApiKey);
+    
     if (geminiApiKey) {
       try {
-        const prompt = messages[messages.length - 1].content;
-
-        const response = await axios.post(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${geminiApiKey}`,
-          {
-            contents: [
-              {
-                parts: [{ text: prompt }]
-              }
-            ],
+        console.log('🤖 AI Chat: Calling Gemini API...');
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${geminiApiKey}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            contents: [{
+              parts: [{
+                text: messages[messages.length - 1].content
+              }]
+            }],
             generationConfig: {
               maxOutputTokens: max_tokens,
-              temperature: 0.7
+              temperature: 0.7,
             }
-          }
-        );
+          })
+        });
 
-        const data = response.data;
-
-        console.log("Gemini Response:", JSON.stringify(data, null, 2));
-
-        if (
-          data.candidates &&
-          data.candidates[0] &&
-          data.candidates[0].content
-        ) {
-          const aiResponse =
-            data.candidates[0].content.parts[0].text;
-
+        console.log('🤖 AI Chat: Gemini API response status:', response.status);
+        const data = await response.json();
+        console.log('🤖 AI Chat: Gemini API response data:', JSON.stringify(data, null, 2));
+        
+        if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+          const aiResponse = data.candidates[0].content.parts[0].text;
+          console.log('🤖 AI Chat: Successfully got response from Gemini');
           return res.json({
             success: true,
             content: aiResponse,
             provider: 'gemini'
           });
         } else {
-          console.error("Invalid Gemini response:", data);
+          console.log('🤖 AI Chat: Invalid response format from Gemini');
+          if (data.error) {
+            console.log('🤖 AI Chat: Gemini API error:', data.error);
+          }
         }
-      } catch (err) {
-        console.error("Gemini API ERROR:", err.response?.data || err.message);
+      } catch (geminiError) {
+        console.error('🤖 AI Chat: Gemini API error:', geminiError);
+        console.error('🤖 AI Chat: Error details:', geminiError.message);
       }
+    } else {
+      console.log('🤖 AI Chat: No Gemini API key found in environment');
     }
 
     // 🔁 fallback
