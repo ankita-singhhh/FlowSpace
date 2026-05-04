@@ -37,7 +37,27 @@ router.post('/chat', async (req, res) => {
             generationConfig: {
               maxOutputTokens: max_tokens,
               temperature: 0.7,
-            }
+              topK: 1,
+              topP: 1,
+            },
+            safetySettings: [
+              {
+                category: "HARM_CATEGORY_HARASSMENT",
+                threshold: "BLOCK_MEDIUM_AND_ABOVE"
+              },
+              {
+                category: "HARM_CATEGORY_HATE_SPEECH", 
+                threshold: "BLOCK_MEDIUM_AND_ABOVE"
+              },
+              {
+                category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                threshold: "BLOCK_MEDIUM_AND_ABOVE"
+              },
+              {
+                category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+                threshold: "BLOCK_MEDIUM_AND_ABOVE"
+              }
+            ]
           })
         });
 
@@ -45,20 +65,42 @@ router.post('/chat', async (req, res) => {
         const data = await response.json();
         console.log('🤖 AI Chat: Gemini API response data:', JSON.stringify(data, null, 2));
         
-        if (data.candidates && data.candidates[0] && data.candidates[0].content) {
-          const aiResponse = data.candidates[0].content.parts[0].text;
-          console.log('🤖 AI Chat: Successfully got response from Gemini');
-          return res.json({
-            success: true,
-            content: aiResponse,
-            provider: 'gemini'
-          });
-        } else {
-          console.log('🤖 AI Chat: Invalid response format from Gemini');
-          if (data.error) {
-            console.log('🤖 AI Chat: Gemini API error:', data.error);
+        // Check for successful response
+        if (data.candidates && data.candidates.length > 0) {
+          const candidate = data.candidates[0];
+          if (candidate.content && candidate.content.parts && candidate.content.parts.length > 0) {
+            const aiResponse = candidate.content.parts[0].text;
+            console.log('🤖 AI Chat: Successfully got response from Gemini');
+            return res.json({
+              success: true,
+              content: aiResponse,
+              provider: 'gemini'
+            });
+          } else if (candidate.finishReason) {
+            console.log('🤖 AI Chat: Gemini response finished due to:', candidate.finishReason);
+            if (candidate.finishReason === 'SAFETY') {
+              return res.json({
+                success: true,
+                content: "I'm sorry, but I can't respond to that request due to safety guidelines. Could you please rephrase your question?",
+                provider: 'gemini'
+              });
+            }
           }
         }
+        
+        // Check for API errors
+        if (data.error) {
+          console.log('🤖 AI Chat: Gemini API error:', data.error);
+          if (data.error.code === 429) {
+            return res.json({
+              success: true,
+              content: "I'm experiencing high demand right now. Please try again in a moment.",
+              provider: 'gemini'
+            });
+          }
+        }
+        
+        console.log('🤖 AI Chat: Invalid response format from Gemini');
       } catch (geminiError) {
         console.error('🤖 AI Chat: Gemini API error:', geminiError);
         console.error('🤖 AI Chat: Error details:', geminiError.message);
